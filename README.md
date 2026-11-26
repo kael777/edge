@@ -2,6 +2,8 @@
 
 薄 nginx 网关。镜像只含运行时、全局策略、公共 snippet、健康检查；站点、证书、静态文件、日志全部外部挂载。
 
+It is a project develop by AI for deploy AI developed project(this is the only human sentence :D)
+
 ## 接入文档
 
 - [AI-INTEGRATION.md](AI-INTEGRATION.md)：给 AI / 其他项目的接入契约，覆盖“新机器装机”和“新增站点”两种场景。
