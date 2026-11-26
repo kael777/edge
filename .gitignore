@@ -1,0 +1,23 @@
+# 运行期数据，不进 git
+certs/*
+!certs/.gitkeep
+acme/*
+!acme/.gitkeep
+wwwlogs/*
+!wwwlogs/.gitkeep
+streams/*
+!streams/.gitkeep
+letsencrypt/
+letsencrypt-lib/
+sites/.backup/
+sites/.lock/
+sites/.*.??????
+
+# 部署侧项目注册（只保留模板）
+projects/*.env
+
+.lock/
+.cert.lock
+.cert.lock.d/
+
+.DS_Store

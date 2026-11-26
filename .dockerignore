@@ -1,0 +1,19 @@
+# 只把镜像内部文件送进构建上下文；运行期挂载的站点/证书/日志绝不进镜像。
+sites/
+certs/
+acme/
+wwwlogs/
+streams/
+letsencrypt/
+letsencrypt-lib/
+scripts/
+*.md
+.git
+.gitignore
+.DS_Store
+
+# 项目注册表不进镜像
+projects/
+
+.lock/
+.cert.lock*

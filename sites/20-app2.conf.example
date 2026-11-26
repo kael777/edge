@@ -1,0 +1,41 @@
+# 示例：反代站点。复制为 sites/20-app2.conf 后修改，或直接用 scripts/add-site.sh 生成。
+# 本文件名不是 *.conf，不会被 nginx 加载。
+
+upstream app2_up {
+    zone app2_up 128k;
+    server app2:3000 resolve;
+    keepalive 32;
+}
+
+server {
+    listen 80;
+    server_name app2.example.com;
+
+    include /etc/nginx/snippets/acme.conf;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name app2.example.com;
+
+    include /etc/nginx/snippets/ssl-common.conf;
+    ssl_certificate     /etc/nginx/certs/app2/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/app2/privkey.pem;
+
+    client_max_body_size 16m;
+
+    location / {
+        include /etc/nginx/snippets/proxy-common.conf;
+        proxy_pass http://app2_up;
+    }
+
+    location /ws/ {
+        include /etc/nginx/snippets/proxy-common.conf;
+        include /etc/nginx/snippets/websocket.conf;
+        proxy_pass http://app2_up;
+    }
+}

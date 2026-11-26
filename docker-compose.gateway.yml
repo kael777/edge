@@ -1,0 +1,56 @@
+# nginx-gateway 独立部署文件。
+# 用法：
+#   docker network create edge          # 只需一次
+#   docker compose -f docker-compose.gateway.yml up -d --build
+#
+# 业务 compose 需要加入同一个 external network，并用唯一 alias 暴露服务名。
+name: nginx-gateway
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: registry.example.com/platform/nginx-gateway:1.30.7-r1
+    container_name: nginx-gateway
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      # 项目专用端口按需取消注释：
+      # - "9000:9000"
+    volumes:
+      - ./sites:/etc/nginx/sites:ro
+      - ./streams:/etc/nginx/streams:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./acme:/var/www/acme:ro
+      - ./wwwlogs:/www/wwwlogs
+      # 遗留静态站按站点显式只读挂载，不要整仓挂：
+      # - ./static/ios:/srv/ios:ro
+    networks:
+      - edge
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+networks:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:-edge}

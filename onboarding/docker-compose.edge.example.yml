@@ -1,0 +1,32 @@
+# 项目 B 接入共享 edge 网关的 compose 示例。
+# 关键：入口服务名必须全局唯一（b-web），加入 external edge，不发布 80/443。
+# DB/Redis 不接 edge。
+
+services:
+  b-web:
+    image: your-app:latest
+    restart: unless-stopped
+    # 不要写 80:80 / 443:443
+    networks:
+      edge:
+        aliases:
+          - b-web
+    # 如果 B 需要健康检查，保留自己的 healthcheck。
+    # 如果 B 是静态站点，不需要 b-web，改用网关挂载：
+    #   edge/docker-compose.gateway.yml 里加 - ./static/b:/srv/b:ro
+    #   并在 b.env 里用 MODE=static、ROOT=/srv/b
+
+  b-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # 留在项目默认网络，不接 edge
+
+  b-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # 留在项目默认网络，不接 edge
+
+networks:
+  edge:
+    external: true
+    name: edge
